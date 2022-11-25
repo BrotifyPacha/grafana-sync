@@ -5,8 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
-
-	"github.com/brotifypacha/grafana_searcher/internal/dashboards"
+	"github.com/brotifypacha/grafana_searcher/internal/grafana"
 	"github.com/brotifypacha/grafana_searcher/internal/miniGrafanaClient"
 )
 
@@ -39,7 +38,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	repo := dashboards.NewDashboardRepo(client)
+	repo := grafana.NewRepository(client)
 
 	tree, err := repo.GetTree()
 	if err != nil {

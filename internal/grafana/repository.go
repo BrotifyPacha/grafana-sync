@@ -1,4 +1,4 @@
-package dashboards
+package grafana
 
 import (
 	"encoding/json"
@@ -11,17 +11,17 @@ type DashboardRepoInterface interface {
 	GetAll() ([]*RawGrafanaApiItem, error)
 }
 
-type DashboardRepo struct {
+type Repository struct {
 	client *miniGrafanaClient.Client
 }
 
-func NewDashboardRepo(client *miniGrafanaClient.Client) *DashboardRepo {
-	return &DashboardRepo{
+func NewRepository(client *miniGrafanaClient.Client) *Repository {
+	return &Repository{
 		client: client,
 	}
 }
 
-func (d *DashboardRepo) GetTree() (dashboards *domain.GrafanaFolder, err error) {
+func (d *Repository) GetTree() (dashboards *domain.GrafanaFolder, err error) {
 	bytes, err := d.client.Get("api/search")
 	if err != nil {
 		return

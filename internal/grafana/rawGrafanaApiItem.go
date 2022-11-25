@@ -1,4 +1,4 @@
-package dashboards
+package grafana
 
 const (
 	ITEM_TYPE_FOLDER    = "dash-folder"
@@ -20,10 +20,4 @@ type RawGrafanaApiItem struct {
 	FolderTitle string
 	FolderUrl   string
 	SortMeta    int
-}
-
-type GrafanaDashboard struct {
-	Id       int
-	Title    string
-	FolderId int
 }
