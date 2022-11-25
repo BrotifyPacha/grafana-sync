@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 	"github.com/brotifypacha/grafana_searcher/internal/grafana"
-	"github.com/brotifypacha/grafana_searcher/internal/miniGrafanaClient"
+	"github.com/brotifypacha/grafana_searcher/internal/grafana/miniGrafanaClient"
 )
 
 const (

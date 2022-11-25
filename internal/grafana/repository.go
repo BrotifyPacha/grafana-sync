@@ -3,7 +3,7 @@ package grafana
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/brotifypacha/grafana_searcher/internal/miniGrafanaClient"
+	"github.com/brotifypacha/grafana_searcher/internal/grafana/miniGrafanaClient"
 	"github.com/brotifypacha/grafana_searcher/internal/domain"
 )
 
