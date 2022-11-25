@@ -3,7 +3,7 @@ package miniGrafanaClient
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"regexp"
 	"strings"
@@ -28,7 +28,7 @@ func (c *Client) Get(apiRoute string) (bytes []byte, err error) {
 	if err != nil {
 		return
 	}
-	bytes, err = ioutil.ReadAll(resp.Body)
+	bytes, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return
 	}
