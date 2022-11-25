@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/brotifypacha/grafana_searcher/internal/miniGrafanaClient"
+	"github.com/brotifypacha/grafana_searcher/internal/domain"
 )
 
 type DashboardRepoInterface interface {
@@ -20,7 +21,7 @@ func NewDashboardRepo(client *miniGrafanaClient.Client) *DashboardRepo {
 	}
 }
 
-func (d *DashboardRepo) GetTree() (dashboards *GrafanaFolder, err error) {
+func (d *DashboardRepo) GetTree() (dashboards *domain.GrafanaFolder, err error) {
 	bytes, err := d.client.Get("api/search")
 	if err != nil {
 		return
@@ -34,17 +35,17 @@ func (d *DashboardRepo) GetTree() (dashboards *GrafanaFolder, err error) {
 	return rootFolder, nil
 }
 
-func buildTree(grafanaItems []*RawGrafanaApiItem) *GrafanaFolder {
-	rootFolder := &GrafanaFolder{
+func buildTree(grafanaItems []*RawGrafanaApiItem) *domain.GrafanaFolder {
+	rootFolder := &domain.GrafanaFolder{
 		Id: 0,
 		Title: "Root folder",
 		FolderId: -1,
-		FolderItems: make([]*GrafanaFolder, 0),
-		DashboardItems: make([]*GrafanaDashboard, 0),
+		FolderItems: make([]*domain.GrafanaFolder, 0),
+		DashboardItems: make([]*domain.GrafanaDashboard, 0),
 	}
 
-	folders := make(map[int]*GrafanaFolder, 0)
-	dashboards := make(map[int]*GrafanaDashboard, 0)
+	folders := make(map[int]*domain.GrafanaFolder, 0)
+	dashboards := make(map[int]*domain.GrafanaDashboard, 0)
 
 	folders[0] = rootFolder
 
@@ -54,18 +55,18 @@ func buildTree(grafanaItems []*RawGrafanaApiItem) *GrafanaFolder {
 		switch grafanaItems[i].Type {
 		case ITEM_TYPE_FOLDER:
 			{
-				folder := &GrafanaFolder{
+				folder := &domain.GrafanaFolder{
 					Id: item.Id,
 					Title: item.Title,
 					FolderId: item.FolderId,
-					FolderItems: make([]*GrafanaFolder, 0),
-					DashboardItems: make([]*GrafanaDashboard, 0),
+					FolderItems: make([]*domain.GrafanaFolder, 0),
+					DashboardItems: make([]*domain.GrafanaDashboard, 0),
 				}
 				folders[item.Id] = folder
 			}
 		case ITEM_TYPE_DASHBORAD:
 			{
-				dashboard := &GrafanaDashboard{
+				dashboard := &domain.GrafanaDashboard{
 					Id: item.Id,
 					Title: item.Title,
 					FolderId: item.FolderId,
@@ -94,7 +95,7 @@ func buildTree(grafanaItems []*RawGrafanaApiItem) *GrafanaFolder {
 }
 
 func printChildren(
-	parent     *GrafanaFolder,
+	parent     *domain.GrafanaFolder,
 	indent     string,
 ) {
 	for i := range parent.DashboardItems {
