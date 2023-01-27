@@ -8,7 +8,7 @@ import (
 )
 
 type DashboardRepoInterface interface {
-	GetAll() ([]*RawGrafanaApiItem, error)
+	GetTree() (*domain.GrafanaFolder, error)
 }
 
 type Repository struct {
