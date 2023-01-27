@@ -93,39 +93,3 @@ func buildTree(grafanaItems []*RawGrafanaApiItem) *domain.GrafanaFolder {
 	}
 	return rootFolder
 }
-
-func printChildren(
-	parent     *domain.GrafanaFolder,
-	indent     string,
-) {
-	for i := range parent.DashboardItems {
-		db := parent.DashboardItems[i]
-		isLast := i == len(parent.DashboardItems) - 1 && len(parent.FolderItems) == 0
-		if isLast {
-			fmt.Printf("%s╙── %s [%d]\n", indent, db.Title, db.Id)
-		} else {
-			fmt.Printf("%s╟── %s [%d]\n", indent, db.Title, db.Id)
-		}
-	}
-	for i := range parent.FolderItems {
-		folder := parent.FolderItems[i]
-
-		notLast := i != len(parent.FolderItems) - 1
-		hasChildren := len(folder.FolderItems) != 0 || len(folder.DashboardItems) != 0
-		if notLast {
-			if hasChildren {
-				fmt.Printf("%s╠═╦ %s [%d]\n", indent, folder.Title, folder.Id)
-				printChildren(parent.FolderItems[i], indent + "║ ")
-			} else {
-				fmt.Printf("%s╠══ %s [%d]\n", indent, folder.Title, folder.Id)
-			}
-		} else {
-			if hasChildren {
-				fmt.Printf("%s╚═╦ %s [%d]\n", indent, folder.Title, folder.Id)
-				printChildren(parent.FolderItems[i], indent + "  ")
-			} else {
-				fmt.Printf("%s╚══ %s [%d]\n", indent, folder.Title, folder.Id)
-			}
-		}
-	}
-}
