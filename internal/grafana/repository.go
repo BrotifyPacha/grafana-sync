@@ -67,7 +67,7 @@ func buildTree(grafanaItems []*RawGrafanaApiItem) *domain.GrafanaFolder {
 		case ITEM_TYPE_DASHBORAD:
 			{
 				dashboard := &domain.GrafanaDashboard{
-					Id: item.Id,
+					Uid: item.Uid,
 					Title: item.Title,
 					FolderId: item.FolderId,
 				}
