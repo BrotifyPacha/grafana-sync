@@ -1,0 +1,74 @@
+package fs
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"github.com/brotifypacha/grafana_searcher/internal/domain"
+	"github.com/brotifypacha/grafana_searcher/internal/grafana"
+)
+
+type SingleFolderFS struct {
+	client grafana.DashboardRepoInterface
+}
+
+func NewSingleFolderFS(
+	client grafana.DashboardRepoInterface,
+) *SingleFolderFS {
+	return &SingleFolderFS{
+		client: client,
+	}
+}
+
+func (fs *SingleFolderFS) Save(folder *domain.GrafanaFolder, path string) error {
+	path, err := filepath.Abs(path)
+	if err != nil {
+		return fmt.Errorf("Couldn't convert to absolute path '%s': %w", path, err)
+	}
+	folderPath := smartJoin(folder.FolderId, path, replaceSpecials(folder.Title))
+	if folder.FolderId == -1 {
+		err = os.Mkdir(folderPath, 0777)
+		if err != nil && !os.IsExist(err) {
+			return fmt.Errorf("Couldn't create dir '%s': %w", folderPath, err)
+		}
+	}
+	for _, subFolder := range folder.FolderItems {
+		err := fs.Save(subFolder, folderPath)
+		if err != nil {
+			return fmt.Errorf("error saving folder: %w", err)
+		}
+	}
+	for _, dashboard := range folder.DashboardItems {
+		bytes, err := fs.client.GetDashboard(dashboard.Uid)
+		if err != nil {
+			return fmt.Errorf("error getting dashboard: %w", err)
+		}
+		filePath := smartJoin(dashboard.FolderId, folderPath, replaceSpecials(dashboard.Title)) + ".json"
+		fmt.Println(filePath)
+		file, err := os.Create(filePath)
+		if err != nil {
+			return fmt.Errorf("couldn't create file '%s': %w", filePath, err)
+		}
+		_, err = file.Write(bytes)
+		if err != nil {
+			return fmt.Errorf("couldn't write to file '%s': %w", filePath, err)
+		}
+	}
+	return nil
+}
+
+func smartJoin(folderId int, path string, child string) string {
+	if folderId == -1 || folderId == 0 {
+		return filepath.Join(path, child)
+	} else {
+		return fmt.Sprintf("%s__%s", path, child)
+	}
+}
+
+func replaceSpecials(str string) string {
+	return strings.NewReplacer(
+		" ", "_",
+		"/", "_",
+	).Replace(str)
+}
