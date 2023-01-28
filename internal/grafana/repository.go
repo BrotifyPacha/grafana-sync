@@ -9,6 +9,7 @@ import (
 
 type DashboardRepoInterface interface {
 	GetTree() (*domain.GrafanaFolder, error)
+	GetDashboard(uid string) ([]byte, error)
 }
 
 type Repository struct {
@@ -92,4 +93,13 @@ func buildTree(grafanaItems []*RawGrafanaApiItem) *domain.GrafanaFolder {
 		folders[folders[i].FolderId].FolderItems = append(folders[folders[i].FolderId].FolderItems, folders[i])
 	}
 	return rootFolder
+}
+
+func (d *Repository) GetDashboard(uid string) ([]byte, error) {
+	bytes, err := d.client.Get(fmt.Sprintf("/api/dashboards/uid/%s", uid))
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return bytes, nil
 }
