@@ -34,9 +34,9 @@ func prettySprint(folder *GrafanaFolder, indent string, recursive bool) string {
 		db := folder.DashboardItems[i]
 		isLast := i == len(folder.DashboardItems) - 1 && len(folder.FolderItems) == 0
 		if isLast {
-			out.WriteString(fmt.Sprintf("%s╙─ %s [%d]\n", indent, db.Title, db.Id))
+			out.WriteString(fmt.Sprintf("%s╙─ %s [%s]\n", indent, db.Title, db.Uid))
 		} else {
-			out.WriteString(fmt.Sprintf("%s╟─ %s [%d]\n", indent, db.Title, db.Id))
+			out.WriteString(fmt.Sprintf("%s╟─ %s [%s]\n", indent, db.Title, db.Uid))
 		}
 	}
 	for i := range folder.FolderItems {

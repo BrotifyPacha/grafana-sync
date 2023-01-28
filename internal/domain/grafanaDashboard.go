@@ -1,7 +1,7 @@
 package domain
 
 type GrafanaDashboard struct {
-	Id       int
+	Uid      string
 	Title    string
 	FolderId int
 }
