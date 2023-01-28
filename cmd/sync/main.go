@@ -47,7 +47,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	fs := fs.NewSingleFolderFS(repo)
+	fileWriter := fs.NewLocalWriter()
+	fs := fs.NewSingleFolderFS(repo, fileWriter)
 	err = fs.Save(tree, localPath)
 	if err != nil {
 		fmt.Println(err)

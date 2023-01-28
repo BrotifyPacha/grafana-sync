@@ -11,24 +11,23 @@ import (
 
 type SingleFolderFS struct {
 	client grafana.DashboardRepoInterface
+	writer FileSystemWriter
 }
 
 func NewSingleFolderFS(
 	client grafana.DashboardRepoInterface,
+	writer FileSystemWriter,
 ) *SingleFolderFS {
 	return &SingleFolderFS{
 		client: client,
+		writer: writer,
 	}
 }
 
 func (fs *SingleFolderFS) Save(folder *domain.GrafanaFolder, path string) error {
-	path, err := filepath.Abs(path)
-	if err != nil {
-		return fmt.Errorf("Couldn't convert to absolute path '%s': %w", path, err)
-	}
 	folderPath := smartJoin(folder.FolderId, path, replaceSpecials(folder.Title))
 	if folder.FolderId == -1 {
-		err = os.Mkdir(folderPath, 0777)
+		err := fs.writer.CreateDir(folderPath)
 		if err != nil && !os.IsExist(err) {
 			return fmt.Errorf("Couldn't create dir '%s': %w", folderPath, err)
 		}
@@ -45,8 +44,7 @@ func (fs *SingleFolderFS) Save(folder *domain.GrafanaFolder, path string) error 
 			return fmt.Errorf("error getting dashboard: %w", err)
 		}
 		filePath := smartJoin(dashboard.FolderId, folderPath, replaceSpecials(dashboard.Title)) + ".json"
-		fmt.Println(filePath)
-		file, err := os.Create(filePath)
+		file, err := fs.writer.CreateFile(filePath)
 		if err != nil {
 			return fmt.Errorf("couldn't create file '%s': %w", filePath, err)
 		}
