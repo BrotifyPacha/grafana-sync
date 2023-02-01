@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-type LocalWriter struct {}
+type LocalWriter struct{}
 
 func NewLocalWriter() *LocalWriter {
 	return new(LocalWriter)
