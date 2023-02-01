@@ -5,17 +5,18 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
 	"github.com/brotifypacha/grafana_searcher/internal/domain"
 	"github.com/brotifypacha/grafana_searcher/internal/grafana"
 )
 
 type SingleFolderFS struct {
-	client grafana.DashboardRepoInterface
+	client grafana.Repository
 	writer FileSystemWriter
 }
 
 func NewSingleFolderFS(
-	client grafana.DashboardRepoInterface,
+	client grafana.Repository,
 	writer FileSystemWriter,
 ) *SingleFolderFS {
 	return &SingleFolderFS{
