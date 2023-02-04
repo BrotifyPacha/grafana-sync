@@ -1,7 +1,6 @@
 package fs
 
 import (
-	"io"
 	"github.com/brotifypacha/grafana_searcher/internal/domain"
 )
 
@@ -11,5 +10,5 @@ type FileSystemInterface interface {
 
 type FileSystemWriter interface {
 	CreateDir(path string) error
-	CreateFile(path string) (io.Writer, error)
+	CreateFile(path string, content []byte) error
 }

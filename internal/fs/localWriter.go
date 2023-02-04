@@ -1,7 +1,6 @@
 package fs
 
 import (
-	"io"
 	"os"
 )
 
@@ -15,6 +14,11 @@ func (*LocalWriter) CreateDir(path string) error {
 	return os.Mkdir(path, 0777)
 }
 
-func (*LocalWriter) CreateFile(path string) (io.Writer, error) {
-	return os.Create(path)
+func (*LocalWriter) CreateFile(path string, content []byte) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	_, err = file.Write(content)
+	return err
 }
