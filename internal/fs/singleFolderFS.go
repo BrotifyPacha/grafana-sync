@@ -12,12 +12,12 @@ import (
 
 type SingleFolderFS struct {
 	client grafana.Repository
-	writer FileSystemWriter
+	writer Writer
 }
 
 func NewSingleFolderFS(
 	client grafana.Repository,
-	writer FileSystemWriter,
+	writer Writer,
 ) *SingleFolderFS {
 	return &SingleFolderFS{
 		client: client,

@@ -7,8 +7,3 @@ import (
 type FileSystemInterface interface {
 	Save(grafanaFolder domain.GrafanaFolder, localFolder string) error
 }
-
-type FileSystemWriter interface {
-	CreateDir(path string) error
-	CreateFile(path string, content []byte) error
-}
