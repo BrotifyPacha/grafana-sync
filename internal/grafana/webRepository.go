@@ -74,6 +74,11 @@ func buildTree(grafanaItems []*RawGrafanaApiItem) *domain.GrafanaFolder {
 	}
 
 	for i := range dashboards {
+		_, ok := folders[dashboards[i].FolderId]
+		if !ok {
+			fmt.Printf("Dashboard is referring to inexisting folder id, %#v", dashboards[i])
+			continue
+		}
 		folders[dashboards[i].FolderId].DashboardItems = append(folders[dashboards[i].FolderId].DashboardItems, dashboards[i])
 	}
 
