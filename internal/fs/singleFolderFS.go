@@ -7,17 +7,18 @@ import (
 	"strings"
 
 	"github.com/brotifypacha/grafana_searcher/internal/domain"
+	"github.com/brotifypacha/grafana_searcher/internal/fs/writer"
 	"github.com/brotifypacha/grafana_searcher/internal/grafana"
 )
 
 type SingleFolderFS struct {
 	client grafana.Repository
-	writer Writer
+	writer writer.Writer
 }
 
 func NewSingleFolderFS(
 	client grafana.Repository,
-	writer Writer,
+	writer writer.Writer,
 ) *SingleFolderFS {
 	return &SingleFolderFS{
 		client: client,

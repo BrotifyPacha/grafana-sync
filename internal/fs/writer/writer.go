@@ -1,4 +1,4 @@
-package fs
+package writer
 
 type Writer interface {
 	CreateDir(path string) error

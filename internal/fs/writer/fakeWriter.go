@@ -1,4 +1,4 @@
-package fs
+package writer
 
 type FakeWriter struct {
 	WrittenEntities []string

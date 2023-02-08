@@ -1,4 +1,4 @@
-package fs
+package writer
 
 import (
 	"os"

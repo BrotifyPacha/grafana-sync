@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/brotifypacha/grafana_searcher/internal/domain"
+	"github.com/brotifypacha/grafana_searcher/internal/fs/writer"
 	"github.com/brotifypacha/grafana_searcher/internal/grafana"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -76,7 +77,7 @@ func TestSingleFolderFS_Save(t *testing.T) {
 
 	repo := grafana.NewMockRepository(ctrl)
 	repo.EXPECT().GetDashboard(gomock.Any()).AnyTimes()
-	writer := NewFakeWriter()
+	writer := writer.NewFakeWriter()
 
 	fileSystem := NewSingleFolderFS(repo, writer)
 
