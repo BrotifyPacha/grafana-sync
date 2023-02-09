@@ -5,7 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
 	"github.com/brotifypacha/grafana_searcher/internal/fs"
+	"github.com/brotifypacha/grafana_searcher/internal/fs/writer"
 	"github.com/brotifypacha/grafana_searcher/internal/grafana"
 	"github.com/brotifypacha/grafana_searcher/internal/grafana/miniGrafanaClient"
 )
@@ -47,7 +49,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fileWriter := fs.NewLocalWriter()
+	fileWriter := writer.NewLocalWriter()
 	fs := fs.NewSingleFolderFS(repo, fileWriter)
 	err = fs.Save(tree, localPath)
 	if err != nil {

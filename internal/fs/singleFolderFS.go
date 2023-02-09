@@ -5,18 +5,20 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
 	"github.com/brotifypacha/grafana_searcher/internal/domain"
+	"github.com/brotifypacha/grafana_searcher/internal/fs/writer"
 	"github.com/brotifypacha/grafana_searcher/internal/grafana"
 )
 
 type SingleFolderFS struct {
-	client grafana.DashboardRepoInterface
-	writer FileSystemWriter
+	client grafana.Repository
+	writer writer.Writer
 }
 
 func NewSingleFolderFS(
-	client grafana.DashboardRepoInterface,
-	writer FileSystemWriter,
+	client grafana.Repository,
+	writer writer.Writer,
 ) *SingleFolderFS {
 	return &SingleFolderFS{
 		client: client,
@@ -44,13 +46,9 @@ func (fs *SingleFolderFS) Save(folder *domain.GrafanaFolder, path string) error 
 			return fmt.Errorf("error getting dashboard: %w", err)
 		}
 		filePath := smartJoin(dashboard.FolderId, folderPath, replaceSpecials(dashboard.Title)) + ".json"
-		file, err := fs.writer.CreateFile(filePath)
+		err = fs.writer.CreateFile(filePath, bytes)
 		if err != nil {
-			return fmt.Errorf("couldn't create file '%s': %w", filePath, err)
-		}
-		_, err = file.Write(bytes)
-		if err != nil {
-			return fmt.Errorf("couldn't write to file '%s': %w", filePath, err)
+			return fmt.Errorf("couldn't write file '%s': %w", filePath, err)
 		}
 	}
 	return nil
