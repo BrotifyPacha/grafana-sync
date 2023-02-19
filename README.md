@@ -3,5 +3,8 @@
 
 # Grafana-sync
 
-TODO: write README
-TODO: automate coverage collection
+TODO:
+
+- [ ] write README
+- [ ] automate coverage shield/badge in README
+
