@@ -1,0 +1,30 @@
+name: CI
+on:
+  push:
+    branches: &branches
+      - master
+      - ci-cd-work
+  pull_request:
+    branches: *branches
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: build
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+      - run: go install github.com/golang/mock/mockgen@v1.6.0
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Generate mocks
+        run: go generate ./...
+
+      - name: Test
+        run: go test -v ./...
