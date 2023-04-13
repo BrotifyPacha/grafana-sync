@@ -1,6 +1,6 @@
 package grafana
 
-import "github.com/brotifypacha/grafana_searcher/internal/domain"
+import "github.com/brotifypacha/grafana-sync/internal/domain"
 
 //go:generate mockgen -source repository.go -package grafana -destination mockRepository.go
 type Repository interface {

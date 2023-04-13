@@ -1,7 +1,7 @@
 package fs
 
 import (
-	"github.com/brotifypacha/grafana_searcher/internal/domain"
+	"github.com/brotifypacha/grafana-sync/internal/domain"
 )
 
 type FileSystemInterface interface {

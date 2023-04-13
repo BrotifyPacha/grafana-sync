@@ -1,4 +1,4 @@
-module github.com/brotifypacha/grafana_searcher
+module github.com/brotifypacha/grafana-sync
 
 go 1.19
 

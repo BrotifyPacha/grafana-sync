@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/brotifypacha/grafana_searcher/internal/fs"
-	"github.com/brotifypacha/grafana_searcher/internal/fs/writer"
-	"github.com/brotifypacha/grafana_searcher/internal/grafana"
-	"github.com/brotifypacha/grafana_searcher/internal/grafana/miniGrafanaClient"
+	"github.com/brotifypacha/grafana-sync/internal/fs"
+	"github.com/brotifypacha/grafana-sync/internal/fs/writer"
+	"github.com/brotifypacha/grafana-sync/internal/grafana"
+	"github.com/brotifypacha/grafana-sync/internal/grafana/miniGrafanaClient"
 )
 
 const (

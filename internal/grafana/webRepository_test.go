@@ -3,7 +3,7 @@ package grafana
 import (
 	"testing"
 
-	"github.com/brotifypacha/grafana_searcher/internal/domain"
+	"github.com/brotifypacha/grafana-sync/internal/domain"
 	"github.com/stretchr/testify/assert"
 )
 

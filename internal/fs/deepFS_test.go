@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/brotifypacha/grafana_searcher/internal/domain"
-	"github.com/brotifypacha/grafana_searcher/internal/fs/writer"
-	"github.com/brotifypacha/grafana_searcher/internal/grafana"
+	"github.com/brotifypacha/grafana-sync/internal/domain"
+	"github.com/brotifypacha/grafana-sync/internal/fs/writer"
+	"github.com/brotifypacha/grafana-sync/internal/grafana"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )

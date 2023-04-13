@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/brotifypacha/grafana_searcher/internal/domain"
-	"github.com/brotifypacha/grafana_searcher/internal/grafana/miniGrafanaClient"
+	"github.com/brotifypacha/grafana-sync/internal/domain"
+	"github.com/brotifypacha/grafana-sync/internal/grafana/miniGrafanaClient"
 )
 
 type WebRepository struct {
