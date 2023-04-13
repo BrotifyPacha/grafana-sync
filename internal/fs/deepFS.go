@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"strconv"
 	"sync"
 
 	"github.com/brotifypacha/grafana_searcher/internal/domain"
@@ -84,7 +85,17 @@ func (fs *DeepFS) saveDashboard(dashboard *domain.GrafanaDashboard, path string)
 	if err != nil {
 		return err
 	}
-	content, err = formatJson(content)
+	parsed := map[string]interface{}{}
+	err = json.Unmarshal(content, &parsed)
+	if err != nil {
+		return err
+	}
+	queries := getRawQueries(parsed)
+	for title, query := range queries {
+		fs.writer.CreateFile(filepath.Join(dashboardFolder, title+".sql"), query)
+	}
+
+	content, err = formatJson(parsed)
 	if err != nil {
 		return err
 	}
@@ -94,16 +105,60 @@ func (fs *DeepFS) saveDashboard(dashboard *domain.GrafanaDashboard, path string)
 	return nil
 }
 
-func formatJson(b []byte) ([]byte, error) {
-	parsed := map[string]interface{}{}
-	err := json.Unmarshal(b, &parsed)
-	if err != nil {
-		return nil, err
+func getRawQueries(m map[string]interface{}) map[string][]byte {
+	result := map[string][]byte{}
+	dashboard := m["dashboard"].(map[string]interface{})
+	panels, ok := dashboard["panels"].([]interface{})
+	if !ok {
+		return result
 	}
+	return getQueriesPanels(panels)
+}
 
+func getQueriesPanels(panels []interface{}) map[string][]byte {
+	result := map[string][]byte{}
+	for _, panelI := range panels {
+		panel, ok := panelI.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if panel["type"] == "row" {
+			panels, ok = panel["panels"].([]interface{})
+			if !ok {
+				continue
+			}
+			queries := getQueriesPanels(panels)
+			for k, v := range queries {
+				result[k] = v
+			}
+		}
+		targets, ok := panel["targets"].([]interface{})
+		if !ok {
+			continue
+		}
+		title := ""
+		if panel["title"] != nil {
+			title = panel["title"].(string)
+		}
+		for i, targetI := range targets {
+			target, ok := targetI.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			rawSql, ok := target["rawSql"]
+			if ok {
+				queryName := title + " #" + strconv.Itoa(i)
+				result[queryName] = []byte(rawSql.(string))
+			}
+		}
+	}
+	return result
+}
+
+func formatJson(m map[string]interface{}) ([]byte, error) {
 	buff := bytes.Buffer{}
 	encoder := json.NewEncoder(&buff)
 	encoder.SetIndent("", "  ")
-	encoder.Encode(parsed)
+	encoder.Encode(m)
 	return buff.Bytes(), nil
 }
