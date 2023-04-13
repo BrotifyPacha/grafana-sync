@@ -107,7 +107,10 @@ func (fs *DeepFS) saveDashboard(dashboard *domain.GrafanaDashboard, path string)
 
 func getRawQueries(m map[string]interface{}) map[string][]byte {
 	result := map[string][]byte{}
-	dashboard := m["dashboard"].(map[string]interface{})
+	dashboard, ok := m["dashboard"].(map[string]interface{})
+	if !ok {
+		return result
+	}
 	panels, ok := dashboard["panels"].([]interface{})
 	if !ok {
 		return result
