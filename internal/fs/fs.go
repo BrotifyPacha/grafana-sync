@@ -5,5 +5,5 @@ import (
 )
 
 type FileSystemInterface interface {
-	Save(grafanaFolder domain.GrafanaFolder, localFolder string) error
+	Save(grafanaFolder domain.GrafanaFolder, localFolder string) []error
 }

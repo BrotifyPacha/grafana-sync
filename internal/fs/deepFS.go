@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"os"
 	"path/filepath"
 	"sync"
 
@@ -28,35 +27,53 @@ func NewDeepFolderFs(
 	}
 }
 
-func (fs *DeepFS) Save(grafanaFolder domain.GrafanaFolder, localFolder string) error {
+const (
+	downloadWorkers = 8
+)
 
-	folderPath := filepath.Join(localFolder, grafanaFolder.Title)
+func (fs *DeepFS) Save(grafanaFolder domain.GrafanaFolder, localFolder string) []error {
+
+	errCh := make(chan error, 5)
+	go func() {
+		fs.saveInternal(grafanaFolder, localFolder, errCh)
+		close(errCh)
+	}()
+
+	errors := []error{}
+	for err := range errCh {
+		errors = append(errors, err)
+	}
+
+	return errors
+}
+
+func (fs *DeepFS) saveInternal(grafanaFolder domain.GrafanaFolder, path string, errCh chan error) {
+
+	folderPath := filepath.Join(path, grafanaFolder.Title)
 	fs.writer.CreateDir(folderPath)
 
 	wg := sync.WaitGroup{}
-	sem := make(chan int, 8)
+	sem := make(chan int, downloadWorkers)
+
 	for _, folder := range grafanaFolder.FolderItems {
 		wg.Add(1)
 		sem <- 1
 		go func(folder *domain.GrafanaFolder, path string) {
-			fs.Save(*folder, folderPath)
+			fs.saveInternal(*folder, folderPath, errCh)
+
 			wg.Done()
 			<-sem
+
 		}(folder, folderPath)
 	}
-
 	for _, dashboard := range grafanaFolder.DashboardItems {
 		err := fs.saveDashboard(dashboard, folderPath)
 		if err != nil {
-			fmt.Println("DeepFS: error writing dashboard: ", err.Error())
-			os.Exit(1)
-			continue
+			err = fmt.Errorf("DeepFS: error saving dashboard: %w", err)
+			errCh <- err
 		}
-		fmt.Println("DeepFS: written:", folderPath+"/"+dashboard.Title)
 	}
-
 	wg.Wait()
-	return nil
 }
 
 func (fs *DeepFS) saveDashboard(dashboard *domain.GrafanaDashboard, path string) error {

@@ -1,6 +1,7 @@
 package fs
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/brotifypacha/grafana_searcher/internal/domain"
@@ -39,6 +40,10 @@ func TestDeepFS_Save(t *testing.T) {
 						&domain.GrafanaDashboard{
 							Title: "dashboard #2",
 						},
+						&domain.GrafanaDashboard{
+							Uid:   "should-error",
+							Title: "dashboard #3",
+						},
 					},
 				},
 				localFolder: "",
@@ -50,6 +55,7 @@ func TestDeepFS_Save(t *testing.T) {
 				"root/dashboard #1/dashboard-data.json",
 				"root/dashboard #2",
 				"root/dashboard #2/dashboard-data.json",
+				"root/dashboard #3",
 			},
 		},
 	}
@@ -57,6 +63,9 @@ func TestDeepFS_Save(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	repo := grafana.NewMockRepository(ctrl)
 	repo.EXPECT().GetDashboard(gomock.Any()).AnyTimes().DoAndReturn(func(uid string) ([]byte, error) {
+		if uid == "should-error" {
+			return nil, errors.New("should error")
+		}
 		return []byte("{}"), nil
 	})
 
@@ -67,8 +76,9 @@ func TestDeepFS_Save(t *testing.T) {
 	)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fs.Save(tt.args.grafanaFolder, tt.args.localFolder)
+			errors := fs.Save(tt.args.grafanaFolder, tt.args.localFolder)
 			assert.Subset(t, tt.expectedFilepaths, fakeWriter.WrittenEntities)
+			assert.Len(t, errors, 1)
 		})
 	}
 }
