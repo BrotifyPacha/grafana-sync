@@ -50,11 +50,10 @@ func main() {
 	}
 
 	fileWriter := writer.NewLocalWriter()
-	fs := fs.NewSingleFolderFS(repo, fileWriter)
-	err = fs.Save(tree, localPath)
+	fs := fs.NewDeepFolderFs(repo, fileWriter)
+	err = fs.Save(*tree, localPath)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	// tree.PrettyPrint(true)
 }
