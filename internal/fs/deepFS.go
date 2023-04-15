@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"path/filepath"
-	"strconv"
 	"sync"
 
 	"github.com/brotifypacha/grafana-sync/internal/domain"
@@ -50,8 +48,11 @@ func (fs *DeepFS) Save(grafanaFolder domain.GrafanaFolder, localFolder string) [
 
 func (fs *DeepFS) saveInternal(grafanaFolder domain.GrafanaFolder, path string, errCh chan error) {
 
-	folderPath := filepath.Join(path, grafanaFolder.Title)
-	fs.writer.CreateDir(folderPath)
+	folderPath := joinEscaping(path, grafanaFolder.Title)
+	err := fs.writer.CreateDir(folderPath)
+	if err != nil {
+		errCh <- err
+	}
 
 	wg := sync.WaitGroup{}
 	sem := make(chan int, downloadWorkers)
@@ -78,8 +79,11 @@ func (fs *DeepFS) saveInternal(grafanaFolder domain.GrafanaFolder, path string, 
 }
 
 func (fs *DeepFS) saveDashboard(dashboard *domain.GrafanaDashboard, path string) error {
-	dashboardFolder := filepath.Join(path, dashboard.Title)
-	fs.writer.CreateDir(dashboardFolder)
+	dashboardFolder := joinEscaping(path, dashboard.Title)
+	err := fs.writer.CreateDir(dashboardFolder)
+	if err != nil {
+		return err
+	}
 
 	content, err := fs.client.GetDashboard(dashboard.Uid)
 	if err != nil {
@@ -90,9 +94,16 @@ func (fs *DeepFS) saveDashboard(dashboard *domain.GrafanaDashboard, path string)
 	if err != nil {
 		return err
 	}
-	queries := getRawQueries(parsed)
-	for title, query := range queries {
-		fs.writer.CreateFile(filepath.Join(dashboardFolder, title+".sql"), query)
+	panels := getPanels(parsed)
+	for _, panel := range panels {
+		panelDir := joinEscaping(dashboardFolder, panel.Title)
+		fs.writer.CreateDir(panelDir)
+		for _, query := range panel.Queries {
+			err = fs.writer.CreateFile(joinEscaping(panelDir, query.Title+".sql"), query.Data)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	content, err = formatJson(parsed)
@@ -100,13 +111,22 @@ func (fs *DeepFS) saveDashboard(dashboard *domain.GrafanaDashboard, path string)
 		return err
 	}
 
-	dashboardFile := filepath.Join(dashboardFolder, "dashboard-data.json")
+	dashboardFile := joinEscaping(dashboardFolder, "dashboard-data.json")
 	fs.writer.CreateFile(dashboardFile, content)
 	return nil
 }
 
-func getRawQueries(m map[string]interface{}) map[string][]byte {
-	result := map[string][]byte{}
+type Panel struct {
+	Title   string
+	Queries []Query
+}
+
+type Query struct {
+	Title string
+	Data  []byte
+}
+
+func getPanels(m map[string]interface{}) (result []Panel) {
 	dashboard, ok := m["dashboard"].(map[string]interface{})
 	if !ok {
 		return result
@@ -118,8 +138,7 @@ func getRawQueries(m map[string]interface{}) map[string][]byte {
 	return getQueriesPanels(panels)
 }
 
-func getQueriesPanels(panels []interface{}) map[string][]byte {
-	result := map[string][]byte{}
+func getQueriesPanels(panels []interface{}) (result []Panel) {
 	for _, panelI := range panels {
 		panel, ok := panelI.(map[string]interface{})
 		if !ok {
@@ -131,29 +150,35 @@ func getQueriesPanels(panels []interface{}) map[string][]byte {
 				continue
 			}
 			queries := getQueriesPanels(panels)
-			for k, v := range queries {
-				result[k] = v
+			for _, v := range queries {
+				result = append(result, v)
 			}
 		}
 		targets, ok := panel["targets"].([]interface{})
 		if !ok {
 			continue
 		}
-		title := ""
+		panelItem := Panel{}
 		if panel["title"] != nil {
-			title = panel["title"].(string)
+			title := panel["title"].(string)
+			id := panel["id"].(float64)
+			panelItem.Title = fmt.Sprintf("%s (id=%v)", title, id)
 		}
-		for i, targetI := range targets {
+		for _, targetI := range targets {
 			target, ok := targetI.(map[string]interface{})
 			if !ok {
 				continue
 			}
 			rawSql, ok := target["rawSql"]
+			refId := target["refId"].(string)
 			if ok {
-				queryName := title + " #" + strconv.Itoa(i)
-				result[queryName] = []byte(rawSql.(string))
+				panelItem.Queries = append(panelItem.Queries, Query{
+					Title: refId,
+					Data:  []byte(rawSql.(string)),
+				})
 			}
 		}
+		result = append(result, panelItem)
 	}
 	return result
 }
