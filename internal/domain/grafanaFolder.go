@@ -17,6 +17,19 @@ func (f *GrafanaFolder) PrettyPrint(recursive bool) {
 	fmt.Println(prettySprint(f, "", recursive))
 }
 
+func (f *GrafanaFolder) FindFolderById(id int) (*GrafanaFolder, error) {
+	if f.Id == id {
+		return f, nil
+	}
+	for i := range f.FolderItems {
+		folder, _ := f.FolderItems[i].FindFolderById(id)
+		if folder != nil {
+			return folder, nil
+		}
+	}
+	return nil, fmt.Errorf("folder with id - %v not found", id)
+}
+
 func prettySprint(folder *GrafanaFolder, indent string, recursive bool) string {
 	out := strings.Builder{}
 
