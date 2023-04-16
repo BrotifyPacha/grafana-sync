@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+var (
+	RootFolderId = 0
+)
+
 type GrafanaFolder struct {
 	Id             int
 	Title          string

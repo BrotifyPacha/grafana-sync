@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/brotifypacha/grafana-sync/internal/domain"
 	"github.com/brotifypacha/grafana-sync/internal/fs"
 	"github.com/brotifypacha/grafana-sync/internal/fs/writer"
 	"github.com/brotifypacha/grafana-sync/internal/grafana"
@@ -25,7 +26,7 @@ func main() {
 	set := flag.NewFlagSet("sync", flag.ContinueOnError)
 	set.StringVar(&localPath, "l", "", pathHelpText)
 	set.StringVar(&grafanaHost, "h", "", hostHelpText)
-	set.IntVar(&folderId, "folderId", grafana.RootRepositoryId, "")
+	set.IntVar(&folderId, "folderId", domain.RootFolderId, "")
 	set.SetOutput(os.Stdout)
 
 	err := set.Parse(os.Args[1:])
