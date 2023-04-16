@@ -34,7 +34,7 @@ func (d *WebRepository) GetTree() (dashboards *domain.GrafanaFolder, err error) 
 
 func buildTree(grafanaItems []*RawGrafanaApiItem) *domain.GrafanaFolder {
 	rootFolder := &domain.GrafanaFolder{
-		Id:             0,
+		Id:             domain.RootFolderId,
 		Title:          "Root folder",
 		FolderId:       -1,
 		FolderItems:    make([]*domain.GrafanaFolder, 0),
@@ -83,7 +83,7 @@ func buildTree(grafanaItems []*RawGrafanaApiItem) *domain.GrafanaFolder {
 	}
 
 	for i := range folders {
-		if folders[i].FolderId == -1 {
+		if folders[i].Id == domain.RootFolderId {
 			continue
 		}
 		_, ok := folders[folders[i].FolderId]

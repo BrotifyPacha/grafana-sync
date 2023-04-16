@@ -11,7 +11,11 @@ func NewLocalWriter() *LocalWriter {
 }
 
 func (*LocalWriter) CreateDir(path string) error {
-	return os.Mkdir(path, 0777)
+	err := os.Mkdir(path, 0777)
+	if os.IsExist(err) {
+		return nil
+	}
+	return err
 }
 
 func (*LocalWriter) CreateFile(path string, content []byte) error {

@@ -1,6 +1,6 @@
 test:
 	go generate ./...
-	go test ./... -coverprofile ./coverage.out
+	go test ./... -coverprofile ./coverage.out -coverpkg ./...
 
 cover: test
 	go tool cover -func ./coverage.out
