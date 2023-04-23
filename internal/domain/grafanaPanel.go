@@ -15,6 +15,7 @@ type Target struct {
 
 const (
 	TARGET_SQL    = "sql"
+	TARGET_PROMQL = "promql"
 )
 
 type Query struct {
@@ -39,6 +40,11 @@ func (t *Target) GetQuery() (result Query, ok bool) {
 	if ok && rawQueryBool && t.RawSql != "" {
 		result.Type = TARGET_SQL
 		result.Expression = t.RawSql
+		return result, true
+	}
+	if t.Expr != "" {
+		result.Type = TARGET_PROMQL
+		result.Expression = t.Expr
 		return result, true
 	}
 	return result, false
