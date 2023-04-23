@@ -49,7 +49,6 @@ func buildTree(grafanaItems []*RawGrafanaApiItem) *domain.GrafanaFolder {
 
 	for i := range grafanaItems {
 		item := grafanaItems[i]
-		// fmt.Printf("%#v\n", item)
 		switch grafanaItems[i].Type {
 		case ITEM_TYPE_FOLDER:
 			{
@@ -98,11 +97,14 @@ func buildTree(grafanaItems []*RawGrafanaApiItem) *domain.GrafanaFolder {
 	return rootFolder
 }
 
-func (d *WebRepository) GetDashboard(uid string) ([]byte, error) {
+func (d *WebRepository) GetDashboard(uid string) (*domain.GrafanaDashboardDetails, error) {
 	bytes, err := d.client.Get(fmt.Sprintf("/api/dashboards/uid/%s", uid))
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
-	return bytes, nil
+	db := domain.GrafanaDashboardDetails{}
+	err = json.Unmarshal(bytes, &db)
+	db.RawData = bytes
+	return &db, err
 }

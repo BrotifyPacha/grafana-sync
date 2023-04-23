@@ -10,7 +10,7 @@ const (
 	promql_query = `metric_name{ label="A" }`
 )
 
-func TestGrafanaPanel_GetQueries(t *testing.T) {
+func TestGrafanaDashboard_GetQueries(t *testing.T) {
 	type fields struct {
 		Uid     string
 		Title   string

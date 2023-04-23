@@ -85,24 +85,12 @@ func (fs *DeepFS) saveDashboard(dashboard *domain.GrafanaDashboard, path string)
 		return err
 	}
 
-	content, err := fs.client.GetDashboard(dashboard.Uid)
+	dashboardDetails, err := fs.client.GetDashboard(dashboard.Uid)
 	if err != nil {
 		return err
 	}
-	tmpStruct := struct {
-		Dashboard struct {
-			Title  string
-			Panels []domain.GrafanaPanel
-		}
-	}{}
-
-	err = json.Unmarshal(content, &tmpStruct)
-	if err != nil {
-		return err
-	}
-	panels := tmpStruct.Dashboard.Panels
-	for _, panel := range panels {
-		panelDir := joinEscaping(dashboardFolder, fmt.Sprintf("%s (id=%v)", panel.Title, panel.Uid))
+	for _, panel := range dashboardDetails.Panels {
+		panelDir := joinEscaping(dashboardFolder, fmt.Sprintf("%s (uid=%v)", panel.Title, panel.Uid))
 		err = fs.writer.CreateDir(panelDir)
 		for _, query := range panel.GetQueries() {
 			err = fs.writer.CreateFile(
@@ -115,16 +103,14 @@ func (fs *DeepFS) saveDashboard(dashboard *domain.GrafanaDashboard, path string)
 		}
 	}
 
-	// reformatting dashboard json and saving it
 	parsed := map[string]interface{}{}
-	err = json.Unmarshal(content, &parsed)
-	content, err = formatJson(parsed)
+	err = json.Unmarshal(dashboardDetails.RawData, &parsed)
+	formatted, err := formatJson(parsed)
 	if err != nil {
 		return err
 	}
 	dashboardFile := joinEscaping(dashboardFolder, "dashboard-data.json")
-	fs.writer.CreateFile(dashboardFile, content)
-
+	fs.writer.CreateFile(dashboardFile, formatted)
 	return nil
 }
 
