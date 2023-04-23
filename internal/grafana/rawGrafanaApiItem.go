@@ -1,5 +1,7 @@
 package grafana
 
+import "github.com/brotifypacha/grafana-sync/internal/domain"
+
 const (
 	ITEM_TYPE_FOLDER    = "dash-folder"
 	ITEM_TYPE_DASHBORAD = "dash-db"
@@ -20,4 +22,8 @@ type RawGrafanaApiItem struct {
 	FolderTitle string
 	FolderUrl   string
 	SortMeta    int
+}
+
+type RawGrafanaDashboardDetails struct {
+	Dashboard domain.GrafanaDashboardDetails
 }

@@ -45,13 +45,14 @@ func Test_buildTree(t *testing.T) {
 			},
 			want: &domain.GrafanaFolder{
 				Title:    "Root folder",
-				Id:       0,
+				Uid:      domain.RootFolderUid,
+				Id:       domain.RootFolderId,
 				FolderId: -1,
 				FolderItems: []*domain.GrafanaFolder{
 					{
 						Id:          1,
 						Title:       "main folder",
-						FolderId:    0,
+						FolderId:    domain.RootFolderId,
 						FolderItems: make([]*domain.GrafanaFolder, 0),
 						DashboardItems: []*domain.GrafanaDashboard{
 							{

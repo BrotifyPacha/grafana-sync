@@ -85,34 +85,32 @@ func (fs *DeepFS) saveDashboard(dashboard *domain.GrafanaDashboard, path string)
 		return err
 	}
 
-	content, err := fs.client.GetDashboard(dashboard.Uid)
+	dashboardDetails, err := fs.client.GetDashboard(dashboard.Uid)
 	if err != nil {
 		return err
 	}
-	parsed := map[string]interface{}{}
-	err = json.Unmarshal(content, &parsed)
-	if err != nil {
-		return err
-	}
-	panels := getPanels(parsed)
-	for _, panel := range panels {
-		panelDir := joinEscaping(dashboardFolder, panel.Title)
-		fs.writer.CreateDir(panelDir)
-		for _, query := range panel.Queries {
-			err = fs.writer.CreateFile(joinEscaping(panelDir, query.Title+".sql"), query.Data)
+	for _, panel := range dashboardDetails.Panels {
+		panelDir := joinEscaping(dashboardFolder, fmt.Sprintf("%s (uid=%v)", panel.Title, panel.Uid))
+		err = fs.writer.CreateDir(panelDir)
+		for _, query := range panel.GetQueries() {
+			err = fs.writer.CreateFile(
+				joinEscaping(panelDir, fmt.Sprintf("%s.%s", query.Title, query.Type)),
+				[]byte(query.Expression),
+			)
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	content, err = formatJson(parsed)
+	parsed := map[string]interface{}{}
+	err = json.Unmarshal(dashboardDetails.RawData, &parsed)
+	formatted, err := formatJson(parsed)
 	if err != nil {
 		return err
 	}
-
 	dashboardFile := joinEscaping(dashboardFolder, "dashboard-data.json")
-	fs.writer.CreateFile(dashboardFile, content)
+	fs.writer.CreateFile(dashboardFile, formatted)
 	return nil
 }
 
@@ -124,63 +122,6 @@ type Panel struct {
 type Query struct {
 	Title string
 	Data  []byte
-}
-
-func getPanels(m map[string]interface{}) (result []Panel) {
-	dashboard, ok := m["dashboard"].(map[string]interface{})
-	if !ok {
-		return result
-	}
-	panels, ok := dashboard["panels"].([]interface{})
-	if !ok {
-		return result
-	}
-	return getQueriesPanels(panels)
-}
-
-func getQueriesPanels(panels []interface{}) (result []Panel) {
-	for _, panelI := range panels {
-		panel, ok := panelI.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		if panel["type"] == "row" {
-			panels, ok = panel["panels"].([]interface{})
-			if !ok {
-				continue
-			}
-			queries := getQueriesPanels(panels)
-			for _, v := range queries {
-				result = append(result, v)
-			}
-		}
-		targets, ok := panel["targets"].([]interface{})
-		if !ok {
-			continue
-		}
-		panelItem := Panel{}
-		if panel["title"] != nil {
-			title := panel["title"].(string)
-			id := panel["id"].(float64)
-			panelItem.Title = fmt.Sprintf("%s (id=%v)", title, id)
-		}
-		for _, targetI := range targets {
-			target, ok := targetI.(map[string]interface{})
-			if !ok {
-				continue
-			}
-			rawSql, ok := target["rawSql"]
-			refId := target["refId"].(string)
-			if ok {
-				panelItem.Queries = append(panelItem.Queries, Query{
-					Title: refId,
-					Data:  []byte(rawSql.(string)),
-				})
-			}
-		}
-		result = append(result, panelItem)
-	}
-	return result
 }
 
 func formatJson(m map[string]interface{}) ([]byte, error) {

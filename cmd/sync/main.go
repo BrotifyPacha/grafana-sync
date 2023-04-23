@@ -21,12 +21,12 @@ const (
 func main() {
 	var localPath string
 	var grafanaHost string
-	var folderId int
+	var folderUid string
 
 	set := flag.NewFlagSet("sync", flag.ContinueOnError)
 	set.StringVar(&localPath, "l", "", pathHelpText)
 	set.StringVar(&grafanaHost, "h", "", hostHelpText)
-	set.IntVar(&folderId, "folderId", domain.RootFolderId, "")
+	set.StringVar(&folderUid, "folder-uid", domain.RootFolderUid, "")
 	set.SetOutput(os.Stdout)
 
 	err := set.Parse(os.Args[1:])
@@ -52,7 +52,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	folderToSync, err := tree.FindFolderById(folderId)
+	folderToSync, err := tree.FindFolderByUid(folderUid)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
