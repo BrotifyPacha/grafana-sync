@@ -34,6 +34,7 @@ func (d *WebRepository) GetTree() (dashboards *domain.GrafanaFolder, err error) 
 
 func buildTree(grafanaItems []*RawGrafanaApiItem) *domain.GrafanaFolder {
 	rootFolder := &domain.GrafanaFolder{
+		Uid:            domain.RootFolderUid,
 		Id:             domain.RootFolderId,
 		Title:          "Root folder",
 		FolderId:       -1,
@@ -53,6 +54,7 @@ func buildTree(grafanaItems []*RawGrafanaApiItem) *domain.GrafanaFolder {
 		case ITEM_TYPE_FOLDER:
 			{
 				folder := &domain.GrafanaFolder{
+					Uid:            item.Uid,
 					Id:             item.Id,
 					Title:          item.Title,
 					FolderId:       item.FolderId,
