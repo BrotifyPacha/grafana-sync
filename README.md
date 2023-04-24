@@ -1,5 +1,5 @@
 ![build](https://github.com/brotifypacha/grafana-sync/actions/workflows/ci.yaml/badge.svg)
-![coverage](https://img.shields.io/badge/coverage-56.8%25-yellow)
+![coverage](https://img.shields.io/badge/coverage-69.6%25-yellowgreen)
 
 # Grafana-sync
 

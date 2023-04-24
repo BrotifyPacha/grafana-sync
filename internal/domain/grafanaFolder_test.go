@@ -3,6 +3,8 @@ package domain
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var FolderStructure = &GrafanaFolder{
@@ -32,11 +34,22 @@ var FolderStructure = &GrafanaFolder{
 			Title: "Secondary",
 			FolderItems: []*GrafanaFolder{
 				&GrafanaFolder{
-					Uid:            "uid-25",
-					Id:             25,
-					Title:          "Secondary sub 1",
-					FolderItems:    []*GrafanaFolder{},
-					DashboardItems: []*GrafanaDashboard{},
+					Uid:         "uid-25",
+					Id:          25,
+					Title:       "Secondary sub 1",
+					FolderItems: []*GrafanaFolder{},
+					DashboardItems: []*GrafanaDashboard{
+						&GrafanaDashboard{
+							Uid:      "uid-1",
+							Title:    "Dashboard #1",
+							FolderId: 25,
+						},
+						&GrafanaDashboard{
+							Uid:      "uid-2",
+							Title:    "Dashboard #2",
+							FolderId: 25,
+						},
+					},
 				},
 				&GrafanaFolder{
 					Uid:            "uid-30",
@@ -46,9 +59,9 @@ var FolderStructure = &GrafanaFolder{
 					DashboardItems: []*GrafanaDashboard{},
 				},
 			},
-			DashboardItems: []*GrafanaDashboard{},
 		},
 	},
+	DashboardItems: []*GrafanaDashboard{},
 }
 
 func TestGrafanaFolder_FindFolderByUid(t *testing.T) {
@@ -98,6 +111,43 @@ func TestGrafanaFolder_FindFolderByUid(t *testing.T) {
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GrafanaFolder.FindFolderById() = %v, want %v", got, tt.want)
 			}
+		})
+	}
+}
+
+func Test_prettySprint(t *testing.T) {
+	type args struct {
+		folder    *GrafanaFolder
+		indent    string
+		recursive bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "recursive",
+			args: args{
+				folder:    FolderStructure,
+				indent:    "",
+				recursive: true,
+			},
+			want: `root [0]
+╠═ Main [uid-10]
+║  ╚═ Main sub 1 [uid-40]
+╚═ Secondary [uid-20]
+   ╠═ Secondary sub 1 [uid-25]
+   ║  ╟─ Dashboard #1 [uid-1]
+   ║  ╙─ Dashboard #2 [uid-2]
+   ╚═ Secondary sub 2 [uid-30]
+`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := prettySprint(tt.args.folder, tt.args.indent, tt.args.recursive)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

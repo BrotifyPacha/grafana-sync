@@ -19,8 +19,8 @@ type GrafanaFolder struct {
 	DashboardItems []*GrafanaDashboard
 }
 
-func (f *GrafanaFolder) PrettyPrint(recursive bool) {
-	fmt.Println(prettySprint(f, "", recursive))
+func (f *GrafanaFolder) PrettySprint(recursive bool) string {
+	return prettySprint(f, "", recursive)
 }
 
 func (f *GrafanaFolder) FindFolderByUid(uid string) (*GrafanaFolder, error) {
@@ -33,7 +33,7 @@ func (f *GrafanaFolder) FindFolderByUid(uid string) (*GrafanaFolder, error) {
 			return folder, nil
 		}
 	}
-	return nil, fmt.Errorf("folder with id - %v not found", uid)
+	return nil, fmt.Errorf("folder with uid - %v not found", uid)
 }
 
 func prettySprint(folder *GrafanaFolder, indent string, recursive bool) string {
@@ -44,10 +44,11 @@ func prettySprint(folder *GrafanaFolder, indent string, recursive bool) string {
 		if mbsubstr(indent, -3, -1) == "║ " {
 			selfIndent = strings.Replace(indent, "║  ", "╠═ ", 1)
 		} else {
-			selfIndent = strings.Replace(indent, "   ", "╚═ ", 1)
+			// selfIndent = strings.Replace(indent, "   ", "╚═ ", 1)
+			selfIndent = mbsubstr(indent, 0, -3) + "╚═ "
 		}
 	}
-	out.WriteString(fmt.Sprintf("%s%s [%d]\n", selfIndent, folder.Title, folder.Id))
+	out.WriteString(fmt.Sprintf("%s%s [%s]\n", selfIndent, folder.Title, folder.Uid))
 
 	for i := range folder.DashboardItems {
 		db := folder.DashboardItems[i]
