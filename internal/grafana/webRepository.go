@@ -103,8 +103,13 @@ func (d *WebRepository) GetDashboard(uid string) (*domain.GrafanaDashboardDetail
 		fmt.Println(err)
 		return nil, err
 	}
-	db := domain.GrafanaDashboardDetails{}
-	err = json.Unmarshal(bytes, &db)
+	db := &domain.GrafanaDashboardDetails{}
+	tmp := struct {
+		Dashboard *domain.GrafanaDashboardDetails
+	}{
+		Dashboard: db,
+	}
+	err = json.Unmarshal(bytes, &tmp)
 	db.RawData = bytes
-	return &db, err
+	return db, err
 }
