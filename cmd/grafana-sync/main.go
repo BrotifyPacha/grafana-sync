@@ -83,7 +83,7 @@ func main() {
 	switch cmd.Name() {
 	case printCmd.Name():
 		{
-			pickedFolder.PrettyPrint(printRecursive)
+			fmt.Println(pickedFolder.PrettySprint(printRecursive))
 		}
 	case syncCmd.Name():
 		{
