@@ -4,3 +4,6 @@ test:
 
 cover: test
 	go tool cover -func ./coverage.out
+
+fmt:
+	go fmt ./...

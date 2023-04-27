@@ -26,45 +26,49 @@ Commands:
 )
 
 func main() {
-	var localPath string
 	var grafanaHost string
 	var folderUid string
 
 	var printRecursive bool
 	printCmd := flag.NewFlagSet("print", flag.ContinueOnError)
 	printCmd.BoolVar(&printRecursive, "recursive", true, "print tree structure recursivly")
-	setBaseFlags(printCmd, &grafanaHost, &localPath, &folderUid)
+	setBaseFlags(printCmd, &grafanaHost, &folderUid)
 
-	syncCmd := flag.NewFlagSet("sync", flag.ExitOnError)
-	setBaseFlags(syncCmd, &grafanaHost, &localPath, &folderUid)
+	var localPath string
+	downloadCmd := flag.NewFlagSet("download", flag.ExitOnError)
+	downloadCmd.StringVar(&localPath, "path", "", pathHelpText)
+	setBaseFlags(downloadCmd, &grafanaHost, &folderUid)
 
 	if len(os.Args) < 1 {
 		fmt.Println(rootUsageText)
 		return
 	}
 
-	var cmd *flag.FlagSet
 	switch os.Args[1] {
 	case printCmd.Name():
 		{
-			cmd = printCmd
+			err := printCmd.Parse(os.Args[2:])
+			if errors.Is(err, flag.ErrHelp) || len(grafanaHost) == 0 {
+				fmt.Printf("Usage: grafana-sync %s [flags...]\n\n", printCmd.Name())
+				printCmd.PrintDefaults()
+				return
+			}
 		}
-	case syncCmd.Name():
+	case downloadCmd.Name():
 		{
-			cmd = syncCmd
+			err := downloadCmd.Parse(os.Args[2:])
+			if errors.Is(err, flag.ErrHelp) || len(grafanaHost) == 0 || len(localPath) == 0 {
+				fmt.Printf("Usage: grafana-sync %s [flags...]\n\n", downloadCmd.Name())
+				downloadCmd.PrintDefaults()
+				return
+			}
 		}
 	default:
 		{
+			fmt.Printf("Unknown command: %s\n", os.Args[1])
 			fmt.Println(rootUsageText)
 			return
 		}
-	}
-
-	err := cmd.Parse(os.Args[2:])
-	if errors.Is(err, flag.ErrHelp) || len(localPath) == 0 || len(grafanaHost) == 0 {
-		fmt.Printf("Usage: grafana-sync %s [flags...]\n\n", cmd.Name())
-		cmd.PrintDefaults()
-		return
 	}
 
 	client, err := miniGrafanaClient.NewClient(grafanaHost)
@@ -80,12 +84,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	switch cmd.Name() {
+	switch printCmd.Name() {
 	case printCmd.Name():
 		{
 			fmt.Println(pickedFolder.PrettySprint(printRecursive))
 		}
-	case syncCmd.Name():
+	case downloadCmd.Name():
 		{
 			fs := fs.NewDeepFolderFs(repo, writer.NewLocalWriter())
 			errs := fs.Save(*pickedFolder, localPath)
@@ -108,12 +112,9 @@ func ExitOnErrors(errs ...error) {
 	}
 }
 
-func setBaseFlags(flagSet *flag.FlagSet, host *string, path *string, folderUid *string) {
+func setBaseFlags(flagSet *flag.FlagSet, host *string, folderUid *string) {
 	flagSet.SetOutput(os.Stdout)
-	flagSet.StringVar(path, "path", "", pathHelpText)
 	flagSet.StringVar(host, "host", "", hostHelpText)
 	flagSet.StringVar(folderUid, "folder-uid", domain.RootFolderUid, folderUidHelpText)
-	flagSet.Usage = func() {
-
-	}
+	flagSet.Usage = func() {}
 }

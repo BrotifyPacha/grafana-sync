@@ -33,7 +33,7 @@ func (c *Client) Get(apiRoute string) (bytes []byte, err error) {
 		return
 	}
 	if resp.StatusCode != 200 {
-		err = errors.New(fmt.Sprintf("Bad status code - %d, body:\n%s", resp.StatusCode, string(bytes))) 
+		err = errors.New(fmt.Sprintf("Bad status code - %d, body:\n%s", resp.StatusCode, string(bytes)))
 		return
 	}
 	return
